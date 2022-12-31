@@ -12,11 +12,11 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
-from util import manhattanDistance
-from game import Directions
-import random, util
+import random
+import util
 
-from game import Agent
+from game import Agent, Directions
+
 
 class ReflexAgent(Agent):
     """
@@ -27,7 +27,6 @@ class ReflexAgent(Agent):
     it in any way you see fit, so long as you don't touch our method
     headers.
     """
-
 
     def getAction(self, gameState):
         """
@@ -45,7 +44,7 @@ class ReflexAgent(Agent):
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        chosenIndex = random.choice(bestIndices)  # Pick randomly among the best
 
         "Add more of your code here if you want to"
 
@@ -76,6 +75,7 @@ class ReflexAgent(Agent):
         "*** YOUR CODE HERE ***"
         return successorGameState.getScore()
 
+
 def scoreEvaluationFunction(currentGameState):
     """
     This default evaluation function just returns the score of the state.
@@ -85,6 +85,7 @@ def scoreEvaluationFunction(currentGameState):
     (not reflex agents).
     """
     return currentGameState.getScore()
+
 
 class MultiAgentSearchAgent(Agent):
     """
@@ -101,10 +102,11 @@ class MultiAgentSearchAgent(Agent):
     is another abstract class.
     """
 
-    def __init__(self, evalFn = 'scoreEvaluationFunction', depth = '2'):
-        self.index = 0 # Pacman is always agent index 0
+    def __init__(self, evalFn='scoreEvaluationFunction', depth='2'):
+        self.index = 0  # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
+
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -137,6 +139,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
+
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
@@ -149,20 +152,52 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
+
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
     """
 
+    def perform_expectimax(self, depth, agentIndex, gameState):
+        if gameState.isWin() or gameState.isLose() or depth > self.depth:
+            return self.evaluationFunction(gameState)
+
+        returnList = []
+        legalActionList = gameState.getLegalActions(agentIndex)
+        if Directions.STOP in legalActionList:
+            legalActionList.remove(Directions.STOP)
+
+        for legalAction in legalActionList:
+            successor = gameState.generateSuccessor(agentIndex, legalAction)
+            if (agentIndex + 1) >= gameState.getNumAgents():
+                returnList += [self.perform_expectimax(depth + 1, 0, successor)]
+            else:
+                returnList += [self.perform_expectimax(depth, agentIndex + 1, successor)]
+
+        if agentIndex == 0:
+            if depth == 1:
+                length = len(returnList)
+                for i in range(length):
+                    if returnList[i] == max(returnList):
+                        return legalActionList[i]
+            else:
+                returnValue = max(returnList)
+
+        elif agentIndex > 0:
+            returnValue = float(sum(returnList) / len(returnList))
+
+        return returnValue
+
     def getAction(self, gameState):
         """
-        Returns the expectimax action using self.depth and self.evaluationFunction
-
-        All ghosts should be modeled as choosing uniformly at random from their
-        legal moves.
+          Returns the expectimax action using self.depth and self.evaluationFunction
+          All ghosts should be modeled as choosing uniformly at random from their
+          legal moves.
         """
         "*** YOUR CODE HERE ***"
+        return self.perform_expectimax(1, 0, gameState)
         util.raiseNotDefined()
+
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -172,7 +207,59 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    floatMax = 9999999999
+
+    pos = currentGameState.getPacmanPosition()
+    currentScore = currentGameState.getScore()
+
+    if currentGameState.isLose():
+        return -floatMax
+    elif currentGameState.isWin():
+        return floatMax
+
+    foodlist = currentGameState.getFood().asList()
+    capsuleList = currentGameState.getCapsules()
+    numberOfCapsulesLeft = len(capsuleList)
+    numberOfFoodsLeft = len(foodlist)
+    distanceToClosestFood = min(map(lambda x: util.manhattanDistance(pos, x), foodlist))
+
+    if numberOfCapsulesLeft != 0:
+        distanceToClosestCapsule = min(map(lambda x: util.manhattanDistance(pos, x), capsuleList))
+    else:
+        distanceToClosestCapsule = floatMax
+
+    scaredGhosts, activeGhosts = [], []
+    for ghost in currentGameState.getGhostStates():
+        if not ghost.scaredTimer:
+            activeGhosts.append(ghost)
+        else:
+            scaredGhosts.append(ghost)
+
+    if activeGhosts:
+        distanceToClosestActiveGhost = min(map(lambda g: util.manhattanDistance(pos, g.getPosition()), activeGhosts))
+    else:
+        distanceToClosestActiveGhost = floatMax
+
+    if scaredGhosts:
+        distanceToClosestScaredGhost = min(map(lambda g: util.manhattanDistance(pos, g.getPosition()), scaredGhosts))
+    else:
+        distanceToClosestScaredGhost = floatMax
+
+    if distanceToClosestActiveGhost <= 1:
+        return -floatMax
+    if distanceToClosestScaredGhost <= 2:
+        return floatMax
+
+    score = 1 * currentScore
+    score -= 1 * distanceToClosestFood
+    score -= 1 * distanceToClosestCapsule
+    score -= 1 * (1 / distanceToClosestActiveGhost)
+    score -= 1 * (1 / distanceToClosestScaredGhost)
+    score -= 1 * numberOfCapsulesLeft
+    score -= 1 * numberOfFoodsLeft
+
+    return score
+
 
 # Abbreviation
 better = betterEvaluationFunction
