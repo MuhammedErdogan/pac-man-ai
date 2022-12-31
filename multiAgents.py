@@ -207,10 +207,10 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    floatMax = 9999999999
+    evalScore = 0
+    floatMax = 9999999
 
-    pos = currentGameState.getPacmanPosition()
-    currentScore = currentGameState.getScore()
+    pacmanPos = currentGameState.getPacmanPosition()
 
     if currentGameState.isLose():
         return -floatMax
@@ -221,10 +221,10 @@ def betterEvaluationFunction(currentGameState):
     capsuleList = currentGameState.getCapsules()
     numberOfCapsulesLeft = len(capsuleList)
     numberOfFoodsLeft = len(foodlist)
-    distanceToClosestFood = min(map(lambda x: util.manhattanDistance(pos, x), foodlist))
+    distanceToClosestFood = min(map(lambda x: util.manhattanDistance(pacmanPos, x), foodlist))
 
     if numberOfCapsulesLeft != 0:
-        distanceToClosestCapsule = min(map(lambda x: util.manhattanDistance(pos, x), capsuleList))
+        distanceToClosestCapsule = min(map(lambda x: util.manhattanDistance(pacmanPos, x), capsuleList))
     else:
         distanceToClosestCapsule = floatMax
 
@@ -236,29 +236,48 @@ def betterEvaluationFunction(currentGameState):
             scaredGhosts.append(ghost)
 
     if activeGhosts:
-        distanceToClosestActiveGhost = min(map(lambda g: util.manhattanDistance(pos, g.getPosition()), activeGhosts))
+        distanceToClosestActiveGhost = min(
+            map(lambda g: util.manhattanDistance(pacmanPos, g.getPosition()), activeGhosts))
     else:
         distanceToClosestActiveGhost = floatMax
 
     if scaredGhosts:
-        distanceToClosestScaredGhost = min(map(lambda g: util.manhattanDistance(pos, g.getPosition()), scaredGhosts))
+        distanceToClosestScaredGhost = min(
+            map(lambda g: util.manhattanDistance(pacmanPos, g.getPosition()), scaredGhosts))
     else:
         distanceToClosestScaredGhost = floatMax
 
     if distanceToClosestActiveGhost <= 1:
         return -floatMax
-    if distanceToClosestScaredGhost <= 2:
+    if distanceToClosestScaredGhost <= 1:
         return floatMax
+    # if distanceToClosestFood <= 1:
+    # return floatMax
 
-    score = 1 * currentScore
-    score -= 1 * distanceToClosestFood
-    score -= 1 * distanceToClosestCapsule
-    score -= 1 * (1 / distanceToClosestActiveGhost)
-    score -= 1 * (1 / distanceToClosestScaredGhost)
-    score -= 1 * numberOfCapsulesLeft
-    score -= 1 * numberOfFoodsLeft
+    scoreMultiplier = 1
+    numberOfFoodsLeftMultiplier = 4
+    numberOfCapsulesLeftMultiplier = 20
+    distanceToClosestFoodMultiplier = 1.5
+    distanceToClosestCapsuleMultiplier = 2
+    distanceToClosestActiveGhostMultiplier = 2
+    distanceToClosestScaredGhostMultiplier = 2
 
-    return score
+    if len(activeGhosts) == 0:
+        distanceToClosestCapsuleMultiplier = 0
+        distanceToClosestActiveGhostMultiplier = 0
+
+    if len(scaredGhosts) == 0:
+        distanceToClosestScaredGhostMultiplier = 0
+
+    evalScore += (currentGameState.getScore() ** 2) * scoreMultiplier
+    evalScore -= (distanceToClosestFood ** 2) * distanceToClosestFoodMultiplier
+    evalScore -= (distanceToClosestCapsule ** 2) * distanceToClosestCapsuleMultiplier
+    evalScore -= (1 / (distanceToClosestActiveGhost ** 2)) * distanceToClosestActiveGhostMultiplier
+    evalScore -= (distanceToClosestScaredGhost ** 2) * distanceToClosestScaredGhostMultiplier
+    evalScore -= (numberOfCapsulesLeft ** 2) * numberOfCapsulesLeftMultiplier
+    evalScore -= (numberOfFoodsLeft ** 2) * numberOfFoodsLeftMultiplier
+
+    return evalScore
 
 
 # Abbreviation
