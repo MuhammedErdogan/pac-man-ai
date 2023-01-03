@@ -113,15 +113,15 @@ if __name__ == '__main__':
 
         for k in range(popSize):
             current = population[k]
-            next_chromosome = crossover_pop[k]
+            next_individual = mutation(crossover_pop[k])
 
             while True:
-                if next_chromosome.fitness > current.fitness:
-                    new_population.append(next_chromosome)
+                if next_individual.fitness > current.fitness:
+                    new_population.append(next_individual)
                     break
                 else:
                     if random.random() < 0.01:
-                        new_population.append(next_chromosome)
+                        new_population.append(next_individual)
                         break
                     else:
                         new_population.append(current)
