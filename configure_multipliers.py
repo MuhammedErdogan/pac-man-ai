@@ -11,8 +11,8 @@ distanceToClosestScaredGhostMultiplier = 20
 
 def decimal_range():
     start = float(0)
-    stop = float(5)
-    increment = float(0.25)
+    stop = float(10)
+    increment = float(0.5)
     while start < stop:
         yield start
         start += increment
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     max_avg_score_win_rate = ""
     max_avg_score_params = []
 
-    game_count = 10
+    game_count = 20
 
     for i in decimal_range():
         scoreMultiplier = i
