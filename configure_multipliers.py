@@ -101,7 +101,7 @@ if __name__ == '__main__':
     best_ind = None
 
     population = populate_population()
-    for generation in range(20):
+    for generation in range(30):
         print("\nGeneration: " + str(generation))
         best_ind = best_individual(population)
         print("\nBest Score: " + str(best_ind.score))
