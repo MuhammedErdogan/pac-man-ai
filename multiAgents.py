@@ -254,9 +254,12 @@ def betterEvaluationFunction(currentGameState):
                                            manhattanDistance(pacmanPos, ghost.getPosition()))
 
     distanceToClosestScaredGhost = floatMax
+    closestScaredGhost = None
     for ghost in scaredGhosts:
-        distanceToClosestScaredGhost = min(distanceToClosestScaredGhost,
-                                           manhattanDistance(pacmanPos, ghost.getPosition()))
+        distance = manhattanDistance(pacmanPos, ghost.getPosition())
+        distanceToClosestScaredGhost = min(distanceToClosestScaredGhost, distance)
+        if distanceToClosestScaredGhost == distance:
+            closestScaredGhost = ghost
 
     numberOfCapsulesLeft = len(capsuleList)
     numberOfFoodsLeft = len(foodlist)
@@ -265,36 +268,58 @@ def betterEvaluationFunction(currentGameState):
     if numberOfCapsulesLeft != 0:
         distanceToClosestCapsule = min(map(lambda x: manhattanDistance(pacmanPos, x), capsuleList))
 
+    # IF DISTANCE TO CLOSEST ACTIVE GHOST IS LESS THAN 1, THEN WE MUST AVOID IT
     if distanceToClosestActiveGhost <= 1:
         return -floatMax
-    if distanceToClosestScaredGhost <= 1:
+    # IF DISTANCE TO CLOSEST SCARED GHOST IS LESS THAN 1, THEN WE MUST EAT IT
+    if distanceToClosestScaredGhost <= 1 <= closestScaredGhost.scaredTimer:
         return floatMax
 
-    scoreMultiplier = 1
-    numberOfFoodsLeftMultiplier = 20
-    numberOfCapsulesLeftMultiplier = 1000
-    distanceToClosestFoodMultiplier = 1.5
-    distanceToClosestCapsuleMultiplier = 4
-    distanceToClosestActiveGhostMultiplier = 1000
-    distanceToClosestScaredGhostMultiplier = 2
+    mazeSize = currentGameState.getWalls().width * currentGameState.getWalls().height
 
+    # IF MAZE SIZE IS SMALLER THAN 175
+    if mazeSize <= 175:
+        scoreMultiplier = 1
+        numberOfFoodsLeftMultiplier = 10
+        numberOfCapsulesLeftMultiplier = 20
+        distanceToClosestFoodMultiplier = 1.5
+        distanceToClosestCapsuleMultiplier = 4
+        distanceToClosestActiveGhostMultiplier = 10
+        distanceToClosestScaredGhostMultiplier = 20
+    # IF MAZE SIZE IS LARGER THAN 225
+    else:
+        scoreMultiplier = 1
+        numberOfFoodsLeftMultiplier = 10
+        numberOfCapsulesLeftMultiplier = 20
+        distanceToClosestFoodMultiplier = 1.5
+        distanceToClosestCapsuleMultiplier = 4
+        distanceToClosestActiveGhostMultiplier = 10
+        distanceToClosestScaredGhostMultiplier = 20
+
+    # IF THERE ARE NO ACTIVE GHOSTS, THEN THE DISTANCE TO THE CLOSEST ACTIVE GHOST IS NOT IMPORTANT AND
+    # WE CAN IGNORE CAPSULES
     if len(activeGhosts) == 0:
         distanceToClosestCapsuleMultiplier = 0
         distanceToClosestActiveGhostMultiplier = 0
 
+    # IF THERE ARE NO SCARED GHOSTS, THEN THE DISTANCE TO THE CLOSEST SCARED GHOST IS NOT IMPORTANT
     if len(scaredGhosts) == 0:
         distanceToClosestScaredGhostMultiplier = 0
 
+    # IF THERE ARE NO CAPSULES LEFT, THEN THE DISTANCE TO THE CLOSEST CAPSULE IS NOT IMPORTANT
     if numberOfCapsulesLeft == 0:
         distanceToClosestCapsuleMultiplier = 0
         numberOfCapsulesLeftMultiplier = 0
 
-    if distanceToClosestActiveGhost > 3:
+    # IF CLOSEST ACTIVE GHOST IS FAR AWAY, THEN IT IS NOT A BIG DEAL
+    if distanceToClosestActiveGhost > 4:
         distanceToClosestActiveGhostMultiplier = 0
 
-    if distanceToClosestScaredGhost > 3:
+    # IF CLOSEST SCARED GHOST IS FURTHER THAN 3 STEPS, THEN DON'T GO FOR IT
+    if distanceToClosestScaredGhost > 4:
         distanceToClosestScaredGhostMultiplier = 0
 
+    # GET EVAL SCORE
     evalScore += (currentGameState.getScore() ** 2) * scoreMultiplier
     evalScore -= (distanceToClosestFood ** 2) * distanceToClosestFoodMultiplier
     evalScore -= (distanceToClosestCapsule ** 2) * distanceToClosestCapsuleMultiplier
