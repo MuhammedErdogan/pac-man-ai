@@ -282,7 +282,7 @@ def betterEvaluationFunction(currentGameState):
     # IF MAZE SIZE IS SMALLER THAN 175
     if mazeSize <= 175:
         scoreMultiplier = 1
-        numberOfFoodsLeftMultiplier = 100
+        numberOfFoodsLeftMultiplier = 1000
         numberOfCapsulesLeftMultiplier = 20
         distanceToClosestFoodMultiplier = 1.5
         distanceToClosestCapsuleMultiplier = 4
@@ -291,7 +291,7 @@ def betterEvaluationFunction(currentGameState):
     # IF MAZE SIZE IS LARGER THAN 225
     else:
         scoreMultiplier = 1
-        numberOfFoodsLeftMultiplier = 100
+        numberOfFoodsLeftMultiplier = 1000
         numberOfCapsulesLeftMultiplier = 20
         distanceToClosestFoodMultiplier = 1.5
         distanceToClosestCapsuleMultiplier = 4
