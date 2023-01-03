@@ -3,17 +3,15 @@ import subprocess
 
 import numpy as np
 
-scoreMultiplier = 33.02
-numberOfFoodsLeftMultiplier = 31.49
-numberOfCapsulesLeftMultiplier = 67.5
-distanceToClosestFoodMultiplier = 80.88
-distanceToClosestCapsuleMultiplier = 70.62
-distanceToClosestActiveGhostMultiplier = 57.5
-distanceToClosestScaredGhostMultiplier = 25.37
+scoreMultiplier = 1.0
+numberOfFoodsLeftMultiplier = 1.0
+numberOfCapsulesLeftMultiplier = 1.0
+distanceToClosestFoodMultiplier = 1.0
+distanceToClosestCapsuleMultiplier = 1.0
+distanceToClosestActiveGhostMultiplier = 1.0
+distanceToClosestScaredGhostMultiplier = 1.0
 
-popSize = 4
-generation = 0
-
+popSize = 5
 
 class Individual:
     def __init__(self, params):
@@ -38,15 +36,20 @@ def crossover(individual1, individual2):
 def crossover_for_pop(population):
     next_generation = []
     total_fitness = sum([individual.fitness for individual in population])
-    weighted_selection = [(0 if individual.fitness < 0 else individual.fitness) / total_fitness for individual in population]
+    weighted_selection = [(0 if individual.fitness < 0 else individual.fitness) / total_fitness for individual in
+                          population]
     for _ in range(0, popSize):
         draw2 = np.random.choice(population, 2, p=weighted_selection)
         next_generation.append(Individual(crossover(draw2[0].params, draw2[1].params)))
     return next_generation
 
 
-def selection(population):
-    return random.sample(population, 2)
+def mutation(individual):
+    mutation_point = random.randint(0, len(individual.params) - 1)
+    individual.params[mutation_point] = return_float_between_1_and_100()
+    individual.fitness = individual.calculate_fitness()
+    return individual
+
 
 def populate_population():
     population = []
@@ -74,7 +77,7 @@ def return_float_between_1_and_100():
 
 
 def run_game(individual):
-    game_count = 20
+    game_count = 50
 
     scoreMultiplier = individual.params[0]
     numberOfFoodsLeftMultiplier = individual.params[1]
@@ -98,7 +101,7 @@ if __name__ == '__main__':
     best_ind = None
 
     population = populate_population()
-    for _ in range(10):
+    for generation in range(20):
         print("\nGeneration: " + str(generation))
         best_ind = best_individual(population)
         print("\nBest Score: " + str(best_ind.score))
@@ -125,7 +128,6 @@ if __name__ == '__main__':
                         break
 
         population = new_population
-        generation += 1
         population.sort(key=lambda x: x.fitness, reverse=True)
 
     print("Best Score: " + str(best_ind.score))
