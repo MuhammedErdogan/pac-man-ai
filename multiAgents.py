@@ -268,38 +268,38 @@ def betterEvaluationFunction(currentGameState):
     if numberOfCapsulesLeft != 0:
         distanceToClosestCapsule = min(map(lambda x: manhattanDistance(pacmanPos, x), capsuleList))
 
+    mazeSize = currentGameState.getWalls().width * currentGameState.getWalls().height
+
+    # OUR HEURISTIC
+
     # IF DISTANCE TO CLOSEST ACTIVE GHOST IS LESS THAN 1, THEN WE MUST AVOID IT
     if distanceToClosestActiveGhost <= 1:
         return -floatMax
     # IF DISTANCE TO CLOSEST SCARED GHOST IS LESS THAN 1, THEN WE MUST EAT IT
-    if distanceToClosestScaredGhost <= 1 <= closestScaredGhost.scaredTimer:
+    if distanceToClosestScaredGhost <= 1 < closestScaredGhost.scaredTimer:
         return floatMax
-
-    mazeSize = currentGameState.getWalls().width * currentGameState.getWalls().height
 
     # IF MAZE SIZE IS SMALLER THAN 175
     if mazeSize <= 175:
         scoreMultiplier = 1
         numberOfFoodsLeftMultiplier = 10
-        numberOfCapsulesLeftMultiplier = 20
+        numberOfCapsulesLeftMultiplier = 200
         distanceToClosestFoodMultiplier = 1.5
         distanceToClosestCapsuleMultiplier = 4
         distanceToClosestActiveGhostMultiplier = 10
-        distanceToClosestScaredGhostMultiplier = 20
+        distanceToClosestScaredGhostMultiplier = 200
     # IF MAZE SIZE IS LARGER THAN 225
     else:
         scoreMultiplier = 1
         numberOfFoodsLeftMultiplier = 10
-        numberOfCapsulesLeftMultiplier = 20
+        numberOfCapsulesLeftMultiplier = 200
         distanceToClosestFoodMultiplier = 1.5
         distanceToClosestCapsuleMultiplier = 4
         distanceToClosestActiveGhostMultiplier = 10
-        distanceToClosestScaredGhostMultiplier = 20
+        distanceToClosestScaredGhostMultiplier = 200
 
     # IF THERE ARE NO ACTIVE GHOSTS, THEN THE DISTANCE TO THE CLOSEST ACTIVE GHOST IS NOT IMPORTANT AND
-    # WE CAN IGNORE CAPSULES
     if len(activeGhosts) == 0:
-        distanceToClosestCapsuleMultiplier = 0
         distanceToClosestActiveGhostMultiplier = 0
 
     # IF THERE ARE NO SCARED GHOSTS, THEN THE DISTANCE TO THE CLOSEST SCARED GHOST IS NOT IMPORTANT
@@ -309,13 +309,12 @@ def betterEvaluationFunction(currentGameState):
     # IF THERE ARE NO CAPSULES LEFT, THEN THE DISTANCE TO THE CLOSEST CAPSULE IS NOT IMPORTANT
     if numberOfCapsulesLeft == 0:
         distanceToClosestCapsuleMultiplier = 0
-        numberOfCapsulesLeftMultiplier = 0
 
     # IF CLOSEST ACTIVE GHOST IS FAR AWAY, THEN IT IS NOT A BIG DEAL
     if distanceToClosestActiveGhost > 4:
         distanceToClosestActiveGhostMultiplier = 0
 
-    # IF CLOSEST SCARED GHOST IS FURTHER THAN 3 STEPS, THEN DON'T GO FOR IT
+    # IF CLOSEST SCARED GHOST IS FURTHER THAN 4 STEPS, THEN DON'T GO FOR IT
     if distanceToClosestScaredGhost > 4:
         distanceToClosestScaredGhostMultiplier = 0
 
