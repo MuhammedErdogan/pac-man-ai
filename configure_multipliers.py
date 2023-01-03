@@ -1,17 +1,17 @@
 import subprocess
 
-scoreMultiplier = 1
-numberOfFoodsLeftMultiplier = 1000
-numberOfCapsulesLeftMultiplier = 20
-distanceToClosestFoodMultiplier = 1.5
-distanceToClosestCapsuleMultiplier = 4
-distanceToClosestActiveGhostMultiplier = 100
-distanceToClosestScaredGhostMultiplier = 20
+scoreMultiplier = 1.0
+numberOfFoodsLeftMultiplier = 1.0
+numberOfCapsulesLeftMultiplier = 1.0
+distanceToClosestFoodMultiplier = 1.0
+distanceToClosestCapsuleMultiplier = 1.0
+distanceToClosestActiveGhostMultiplier = 1.0
+distanceToClosestScaredGhostMultiplier = 1.0
 
 
 def decimal_range():
-    start = float(0)
-    stop = float(10)
+    start = float(1.0)
+    stop = float(10.0)
     increment = float(0.5)
     while start < stop:
         yield start
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     max_avg_score_win_rate = ""
     max_avg_score_params = []
 
-    game_count = 20
+    game_count = 30
 
     for i in decimal_range():
         scoreMultiplier = i
