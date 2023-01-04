@@ -3,15 +3,17 @@ import subprocess
 
 import numpy as np
 
-scoreMultiplier = 1.0
-numberOfFoodsLeftMultiplier = 1.0
-numberOfCapsulesLeftMultiplier = 1.0
-distanceToClosestFoodMultiplier = 1.0
-distanceToClosestCapsuleMultiplier = 1.0
-distanceToClosestActiveGhostMultiplier = 1.0
-distanceToClosestScaredGhostMultiplier = 1.0
 
-popSize = 5
+params = [5.07, 23.48, 96.92, 7.43, 9.45, 24.37, 38.68]
+scoreMultiplier = params[0]
+numberOfFoodsLeftMultiplier = params[1]
+numberOfCapsulesLeftMultiplier = params[2]
+distanceToClosestFoodMultiplier = params[3]
+distanceToClosestCapsuleMultiplier = params[4]
+distanceToClosestActiveGhostMultiplier = params[5]
+distanceToClosestScaredGhostMultiplier = params[6]
+
+popSize = 2
 
 class Individual:
     def __init__(self, params):
@@ -36,7 +38,7 @@ def crossover(individual1, individual2):
 def crossover_for_pop(population):
     next_generation = []
     total_fitness = sum([individual.fitness for individual in population])
-    weighted_selection = [(0 if individual.fitness < 0 else individual.fitness) / total_fitness for individual in
+    weighted_selection = [(0.01 if individual.fitness < 0 else individual.fitness) / total_fitness for individual in
                           population]
     for _ in range(0, popSize):
         draw2 = np.random.choice(population, 2, p=weighted_selection)
@@ -45,18 +47,13 @@ def crossover_for_pop(population):
 
 
 def mutation(individual):
-    mutation_point = random.randint(0, len(individual.params) - 1)
-    individual.params[mutation_point] = return_float_between_1_and_100()
+    individual.params[random.randint(0, len(individual.params) - 1)] = return_float_between_1_and_100()
     individual.fitness = individual.calculate_fitness()
     return individual
 
 
 def populate_population():
-    population = []
-    for _ in range(popSize):
-        individual = Individual([return_float_between_1_and_100() for _ in range(7)])
-        population.append(individual)
-    return population
+    return [Individual([return_float_between_1_and_100() for _ in range(7)]) for _ in range(popSize)]
 
 
 def best_individual(population):
@@ -73,11 +70,11 @@ def decimal_range():
 
 
 def return_float_between_1_and_100():
-    return float(random.random() * 100.0 + 1.0).__round__(2)
+    return float(random.random() * 999.9 + 0.1).__round__(2)
 
 
 def run_game(individual):
-    game_count = 50
+    game_count = 2
 
     scoreMultiplier = individual.params[0]
     numberOfFoodsLeftMultiplier = individual.params[1]
@@ -101,7 +98,7 @@ if __name__ == '__main__':
     best_ind = None
 
     population = populate_population()
-    for generation in range(30):
+    for generation in range(50):
         print("\nGeneration: " + str(generation))
         best_ind = best_individual(population)
         print("\nBest Score: " + str(best_ind.score))
@@ -111,9 +108,9 @@ if __name__ == '__main__':
         crossover_pop = crossover_for_pop(population)
         crossover_pop.sort(key=lambda x: x.fitness, reverse=False)
 
-        for k in range(popSize):
-            current = population[k]
-            next_individual = mutation(crossover_pop[k])
+        for _ in range(popSize):
+            current = population[_]
+            next_individual = mutation(crossover_pop[_])
 
             while True:
                 if next_individual.fitness > current.fitness:

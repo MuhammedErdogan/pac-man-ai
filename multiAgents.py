@@ -14,7 +14,6 @@
 
 import random
 
-import configure_multipliers
 import util
 from util import manhattanDistance
 
@@ -171,7 +170,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         action, value = self.expectimax(gameState, "action", self.depth * gameState.getNumAgents(), 0)
         return action
-        util.raiseNotDefined()
 
     def expectimax(self, gameState, action, depth, agentIndex):
         if gameState.isWin() or gameState.isLose() or depth == 0:
@@ -284,53 +282,49 @@ def betterEvaluationFunction(currentGameState):
     # IF MAZE SIZE IS SMALLER THAN 175
     if mazeSize <= 175:
         scoreMultiplier = 1
-        numberOfFoodsLeftMultiplier = 1000
-        numberOfCapsulesLeftMultiplier = 20
-        distanceToClosestFoodMultiplier = 1.5
-        distanceToClosestCapsuleMultiplier = 4
-        distanceToClosestActiveGhostMultiplier = 100
-        distanceToClosestScaredGhostMultiplier = 20
+        numberOfFoodsLeftMultiplier = 10
+        numberOfCapsulesLeftMultiplier = 10000
+        distanceToClosestFoodMultiplier = 0.15
+        distanceToClosestCapsuleMultiplier = 0.4
+        distanceToClosestActiveGhostMultiplier = 1
+        distanceToClosestScaredGhostMultiplier = 2
+        numberOfScaredGhostMultiplier = 1000
     # IF MAZE SIZE IS LARGER THAN 225
     else:
         scoreMultiplier = 1
-        numberOfFoodsLeftMultiplier = 1000
-        numberOfCapsulesLeftMultiplier = 20
-        distanceToClosestFoodMultiplier = 1.5
-        distanceToClosestCapsuleMultiplier = 4
-        distanceToClosestActiveGhostMultiplier = 100
+        numberOfFoodsLeftMultiplier = 10
+        numberOfCapsulesLeftMultiplier = 10000
+        distanceToClosestFoodMultiplier = 0.15
+        distanceToClosestCapsuleMultiplier = 0.4
+        distanceToClosestActiveGhostMultiplier = 10
         distanceToClosestScaredGhostMultiplier = 20
+        numberOfScaredGhostMultiplier = 1000
 
     # IF THERE ARE NO ACTIVE GHOSTS, THEN THE DISTANCE TO THE CLOSEST ACTIVE GHOST IS NOT IMPORTANT AND
     if len(activeGhosts) == 0:
-        configure_multipliers.distanceToClosestActiveGhostMultiplier = 0
+        distanceToClosestActiveGhostMultiplier = 0
 
     # IF THERE ARE NO SCARED GHOSTS, THEN THE DISTANCE TO THE CLOSEST SCARED GHOST IS NOT IMPORTANT
     if len(scaredGhosts) == 0:
-        configure_multipliers.distanceToClosestScaredGhostMultiplier = 0
+        distanceToClosestScaredGhostMultiplier = 0
+    else:
+        numberOfCapsulesLeftMultiplier = 0
 
     # IF THERE ARE NO CAPSULES LEFT, THEN THE DISTANCE TO THE CLOSEST CAPSULE IS NOT IMPORTANT
     if numberOfCapsulesLeft == 0:
-        configure_multipliers.distanceToClosestCapsuleMultiplier = 0
-
-    # IF CLOSEST ACTIVE GHOST IS FAR AWAY, THEN IT IS NOT A BIG DEAL
-    if distanceToClosestActiveGhost > 4:
-        configure_multipliers.distanceToClosestActiveGhostMultiplier = 0
-
-    # IF CLOSEST SCARED GHOST IS FURTHER THAN 4 STEPS, THEN DON'T GO FOR IT
-    if distanceToClosestScaredGhost > 4:
-        configure_multipliers.distanceToClosestScaredGhostMultiplier = 0
+        distanceToClosestCapsuleMultiplier = 0
 
     # GET EVAL SCORE
-    evalScore += (currentGameState.getScore() ** 2) * configure_multipliers.scoreMultiplier
-    evalScore -= (distanceToClosestFood ** 2) * configure_multipliers.distanceToClosestFoodMultiplier
-    evalScore -= (distanceToClosestCapsule ** 2) * configure_multipliers.distanceToClosestCapsuleMultiplier
-    evalScore -= (1 / (distanceToClosestActiveGhost ** 2)) * configure_multipliers.distanceToClosestActiveGhostMultiplier
-    evalScore -= (distanceToClosestScaredGhost ** 2) * configure_multipliers.distanceToClosestScaredGhostMultiplier
-    evalScore -= (numberOfCapsulesLeft ** 2) * configure_multipliers.numberOfCapsulesLeftMultiplier
-    evalScore -= (numberOfFoodsLeft ** 2) * configure_multipliers.numberOfFoodsLeftMultiplier
+    evalScore += (currentGameState.getScore() ** 2) * scoreMultiplier
+    evalScore -= (distanceToClosestFood ** 2) * distanceToClosestFoodMultiplier
+    evalScore -= (distanceToClosestCapsule ** 2) * distanceToClosestCapsuleMultiplier
+    evalScore -= (1 / (distanceToClosestActiveGhost ** 2)) * distanceToClosestActiveGhostMultiplier
+    evalScore -= (distanceToClosestScaredGhost ** 2) * distanceToClosestScaredGhostMultiplier
+    evalScore -= (numberOfCapsulesLeft ** 2) * numberOfCapsulesLeftMultiplier
+    evalScore -= (numberOfFoodsLeft ** 2) * numberOfFoodsLeftMultiplier
+    evalScore -= len(scaredGhosts) ** 2 * numberOfScaredGhostMultiplier
 
     return evalScore
-
 
 # Abbreviation
 better = betterEvaluationFunction
