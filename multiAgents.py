@@ -279,22 +279,22 @@ def betterEvaluationFunction(currentGameState):
     if mazeSize <= 175:
         scoreMultiplier = 1
         numberOfFoodsLeftMultiplier = 10
-        numberOfCapsulesLeftMultiplier = 10000
+        numberOfCapsulesLeftMultiplier = 100000
         distanceToClosestFoodMultiplier = 0.15
         distanceToClosestCapsuleMultiplier = 0.4
         distanceToClosestActiveGhostMultiplier = 1
         distanceToClosestScaredGhostMultiplier = 2
-        numberOfScaredGhostMultiplier = 1000
+        numberOfScaredGhostMultiplier = 10000
     # IF MAZE SIZE IS LARGER THAN 225
     else:
         scoreMultiplier = 1
         numberOfFoodsLeftMultiplier = 10
-        numberOfCapsulesLeftMultiplier = 10000
+        numberOfCapsulesLeftMultiplier = 100000
         distanceToClosestFoodMultiplier = 0.15
         distanceToClosestCapsuleMultiplier = 0.4
         distanceToClosestActiveGhostMultiplier = 10
         distanceToClosestScaredGhostMultiplier = 20
-        numberOfScaredGhostMultiplier = 1000
+        numberOfScaredGhostMultiplier = 10000
 
     # IF THERE ARE NO ACTIVE GHOSTS, THEN THE DISTANCE TO THE CLOSEST ACTIVE GHOST IS NOT IMPORTANT AND
     if len(activeGhosts) == 0:
