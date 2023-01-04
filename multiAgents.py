@@ -168,54 +168,50 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           The expectimax function returns a tuple of (actions,
         """
         "*** YOUR CODE HERE ***"
-        action, value = self.expectimax(gameState, "action", self.depth * gameState.getNumAgents(), 0)
+        action, value = self.expectimax(gameState, "", self.depth * gameState.getNumAgents(), 0)
         return action
 
-    def expectimax(self, gameState, action, depth, agentIndex):
-        if gameState.isWin() or gameState.isLose() or depth == 0:
-            return action, self.evaluationFunction(gameState)
+    def expectimax(self, game_state, action, depth, agent_index):
+        if game_state.isWin() or game_state.isLose() or depth == 0:
+            return action, self.evaluationFunction(game_state)
 
-        if agentIndex == 0:
-            return self.max_value(gameState, action, depth, agentIndex)
+        return self.max_value(game_state, action, depth, agent_index) if agent_index == 0 else self.exp_value(game_state, action, depth, agent_index)
 
-        return self.exp_value(gameState, action, depth, agentIndex)
-
-    def max_value(self, gameState, action, depth, agentIndex):
+    def max_value(self, game_state, action, depth, agent_index):
         bestAction = None
         bestValue = float("-inf")
 
-        legalActions = gameState.getLegalActions(agentIndex)
+        legalActions = game_state.getLegalActions(agent_index)
 
         for legalAction in legalActions:
             if legalAction == Directions.STOP:
                 continue
 
-            if depth != self.depth * gameState.getNumAgents():
-                tempAction, tempValue = self.expectimax(gameState.generateSuccessor(agentIndex, legalAction),
-                                                        action, depth - 1, (agentIndex + 1) % gameState.getNumAgents())
-            else:
-                tempAction, tempValue = self.expectimax(gameState.generateSuccessor(agentIndex, legalAction),
-                                                        legalAction, depth - 1,
-                                                        (agentIndex + 1) % gameState.getNumAgents())
+            successor = game_state.generateSuccessor(agent_index, legalAction)
+            decided_action = action if depth != self.depth * game_state.getNumAgents() else legalAction
+            new_depth = depth - 1
+            new_agent_index = (agent_index + 1) % game_state.getNumAgents()
+            tempAction, tempValue = self.expectimax(successor, decided_action, new_depth, new_agent_index)
+
             if tempValue > bestValue:
                 bestAction = tempAction
                 bestValue = tempValue
 
         return bestAction, bestValue
 
-    def exp_value(self, gameState, action, depth, agentIndex):
-        legalActions = gameState.getLegalActions(agentIndex)
+    def exp_value(self, game_state, action, depth, agent_index):
+        legalActions = game_state.getLegalActions(agent_index)
 
         averageScore = 0
-        probability = 1.0 / len(legalActions)
-
         for legalAction in legalActions:
             if legalAction == Directions.STOP:
                 continue
 
-            bestAction, bestValue = self.expectimax(gameState.generateSuccessor(agentIndex, legalAction), action,
-                                                    depth - 1, (agentIndex + 1) % gameState.getNumAgents())
-            averageScore += bestValue * probability
+            successor = game_state.generateSuccessor(agent_index, legalAction)
+            new_depth = depth - 1
+            new_agent_index = (agent_index + 1) % game_state.getNumAgents()
+            bestAction, bestValue = self.expectimax(successor, action, new_depth, new_agent_index)
+            averageScore += bestValue * 1.0 / len(legalActions)
         return action, averageScore
 
 
@@ -325,6 +321,7 @@ def betterEvaluationFunction(currentGameState):
     evalScore -= len(scaredGhosts) ** 2 * numberOfScaredGhostMultiplier
 
     return evalScore
+
 
 # Abbreviation
 better = betterEvaluationFunction
